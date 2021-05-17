@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <ctime>
 #include <string>
 #include <cstdlib>
@@ -60,6 +61,10 @@ void quickSort(int arr[], int highIndex, int lowIndex = 0);
 
 
 int main() {
+	// Open the file
+	std::ofstream fout;
+	fout.open("sorts.csv");
+
 	typedef void (*arrGen)( int[], int ); // define a type for the generator functions
 	static arrGen gen_function_pointers[NUM_STARTS] = { genRandomDataSet, genInOrderDataSet, genReverseDataSet }; // create an array of pointers to the array generator functions
 	
@@ -72,26 +77,26 @@ int main() {
 	static int arr100000[100000];
 	int *holdingArr[4] = {arr100, arr1000, arr10000, arr100000};
 	
-	std::cout << "QuickSort, ";
+	fout << "QuickSort, ";
 	for (int i = 0; i < NUM_LENGTHS; i++) {
-		std::cout << ARRAY_LENGTHS[i];
+		fout << ARRAY_LENGTHS[i];
 		if (i + 1 != NUM_LENGTHS) { // Only show a comma if it's not the last of the lengths
-			std::cout << ", ";
+			fout << ", ";
 		}
 	}
-	std::cout << std::endl;
+	fout << std::endl;
 	
 	
 	for (int startType = 0; startType < NUM_STARTS; startType++) {
 		switch(startType) {
 			case RANDOM:
-				std::cout << "Random, ";
+				fout << "Random, ";
 				break;
 			case INORDER:
-				std::cout << "In Order, ";
+				fout << "In Order, ";
 				break;
 			case REVERSED:
-				std::cout << "Reversed, ";
+				fout << "Reversed, ";
 				break;
 			default:
 				return -1;
@@ -115,14 +120,15 @@ int main() {
 			t = clock() - t;
 			elapsed = ((double)t)/CLOCKS_PER_SEC;
 			
-			std::cout << elapsed << "s";
+			fout << elapsed << "s";
 			
 			if (i + 1 != NUM_LENGTHS) { // Only show a comma if it's not the last of the lengths
-				std::cout << ", ";
+				fout << ", ";
 			}
 		}
-		std::cout << std::endl;
+		fout << std::endl;
 	}
+	fout.close(); // Close the file
 }
 
 

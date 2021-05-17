@@ -7,6 +7,7 @@ project(main)
 add_executable(main src/main.cpp)
 
 set_property(TARGET main PROPERTY CXX_STANDARD 14)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "") # works
 
 install(TARGETS main)
 

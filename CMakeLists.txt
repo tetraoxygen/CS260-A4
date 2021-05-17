@@ -2,17 +2,17 @@ cmake_minimum_required(VERSION 3.16)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-project(main)
+project(sorts)
 
-add_executable(main src/main.cpp)
+add_executable(sorts src/main.cpp)
 
-set_property(TARGET main PROPERTY CXX_STANDARD 14)
+set_property(TARGET sorts PROPERTY CXX_STANDARD 14)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "") # works
 
-install(TARGETS main)
+install(TARGETS sorts)
 
 IF (WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-	target_link_libraries(main -static)
+	target_link_libraries(sorts -static)
 ENDIF()
 
 if (MSVC)

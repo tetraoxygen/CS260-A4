@@ -118,7 +118,7 @@ jobs:
             ${{ matrix.config.name }}-ccache-
 
       - name: Configure
-        shell: cmake "-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64" -P {0}
+        shell: cmake -P {0}
         run: |
           set(ENV{CC} ${{ matrix.config.cc }})
           set(ENV{CXX} ${{ matrix.config.cxx }})
@@ -144,6 +144,7 @@ jobs:
 
           execute_process(
             COMMAND cmake
+              "-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64" 
               -S .
               -B build
               -D CMAKE_BUILD_TYPE=$ENV{BUILD_TYPE}

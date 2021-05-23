@@ -5,10 +5,18 @@
 #include <cstdlib>
 
 const int NUM_STARTS = 3;
-enum START_TYPES {RANDOM, INORDER, REVERSED};
+enum START_TYPES { RANDOM, INORDER, REVERSED };
+const std::string FRIENDLY_START_NAMES[NUM_STARTS] = { "Random", "In Order", "Reversed" };
+
+const int NUM_SORTS = 3;
+enum SORT_TYPES { QUICK, BUBBLE, INSERTION };
+const std::string FRIENDLY_SORT_NAMES[NUM_SORTS] = { "QuickSort", "BubbleSort", "InsertionSort" };
 
 const int NUM_LENGTHS = 4;
 const int ARRAY_LENGTHS[NUM_LENGTHS] = { 100, 1000, 10000, 100000 };
+
+typedef void (*arrGen)( int[], int ); // define a type for the generator functions
+typedef void (*sorter)( int[], int ); // define a type for the sorting functions
 
 // Array content generators  -------------
 
@@ -57,16 +65,36 @@ int partition(int arr[], int lowIndex, int highIndex);
 *		@param highIndex - the upper bound of the sublist (as a list index)
 *		@param lowIndex - the low bound of the list (only for use of the function recursively, defaults to 0)
 */
-void quickSort(int arr[], int highIndex, int lowIndex = 0);
+void quickSortRecursive(int arr[], int highIndex, int lowIndex);
 
+/**
+*	Sorts a list using the QuickSort algorithm by calling quickSortRecursive
+*		@param arr - the array to sort
+*		@param size - the size of the array
+*/
+void quickSort(int arr[], int size);
+
+/**
+*	Sorts a list using the BubbleSort algorithm.
+*		@param arr - the array to sort
+*		@param size - the size of the array
+*/
+void bubbleSort(int arr[], int size);
+
+/**
+*	Sorts a list using the InsertionSort algorithm.
+*		@param arr - the array to sort
+*		@param size - the size of the array
+*/
+void insertionSort(int arr[], int size);
+
+static arrGen gen_function_pointers[NUM_STARTS] = { genRandomDataSet, genInOrderDataSet, genReverseDataSet }; // create an array of pointers to the array generator functions
+static sorter sort_function_pointers[NUM_SORTS] = { quickSort, bubbleSort, insertionSort }; // create an array of pointers to the array generator functions
 
 int main() {
 	// Open the file
 	std::ofstream fout;
 	fout.open("sorts.csv");
-
-	typedef void (*arrGen)( int[], int ); // define a type for the generator functions
-	static arrGen gen_function_pointers[NUM_STARTS] = { genRandomDataSet, genInOrderDataSet, genReverseDataSet }; // create an array of pointers to the array generator functions
 	
 	clock_t t;
 	double elapsed;
@@ -77,60 +105,51 @@ int main() {
 	static int arr100000[100000];
 	int *holdingArr[4] = {arr100, arr1000, arr10000, arr100000};
 	
-	fout << "QuickSort, ";
-	for (int i = 0; i < NUM_LENGTHS; i++) {
-		fout << ARRAY_LENGTHS[i];
-		if (i + 1 != NUM_LENGTHS) { // Only show a comma if it's not the last of the lengths
-			fout << ", ";
-		}
-	}
-	fout << std::endl;
-	
-	
-	for (int startType = 0; startType < NUM_STARTS; startType++) {
-		switch(startType) {
-			case RANDOM:
-				fout << "Random, ";
-				break;
-			case INORDER:
-				fout << "In Order, ";
-				break;
-			case REVERSED:
-				fout << "Reversed, ";
-				break;
-			default:
-				return -1;
-		}
-		
+	for (int sortType = 0; sortType < NUM_SORTS; sortType++) {
+
+		fout << FRIENDLY_SORT_NAMES[sortType] << ", ";
 		for (int i = 0; i < NUM_LENGTHS; i++) {
-			// Create the array
-			int currentSize = ARRAY_LENGTHS[i];
-			int *currentArr = holdingArr[i];
-			
-			// Fill it with the appropriate data
-			(*gen_function_pointers[startType])(currentArr, currentSize);
-			
-			// Get the time before running the sort
-			t = clock();
-			
-			// Sort the array
-			quickSort(currentArr, currentSize);
-			
-			// Get the time elapsed, then convert it to seconds
-			t = clock() - t;
-			elapsed = ((double)t)/CLOCKS_PER_SEC;
-			
-			fout << elapsed << "s";
-			
+			fout << ARRAY_LENGTHS[i];
 			if (i + 1 != NUM_LENGTHS) { // Only show a comma if it's not the last of the lengths
 				fout << ", ";
 			}
 		}
 		fout << std::endl;
+	
+		for (int startType = 0; startType < NUM_STARTS; startType++) {
+			fout << FRIENDLY_START_NAMES[startType] << ", ";
+			
+			for (int i = 0; i < NUM_LENGTHS; i++) {
+				// Create the array
+				int currentSize = ARRAY_LENGTHS[i];
+				int *currentArr = holdingArr[i];
+				
+				// Fill it with the appropriate data
+				(*gen_function_pointers[startType])(currentArr, currentSize);
+				
+				// Get the time before running the sort
+				t = clock();
+				
+				// Sort the array
+				(*sort_function_pointers[sortType])(currentArr, currentSize);
+				
+				// Get the time elapsed, then convert it to seconds
+				t = clock() - t;
+				elapsed = ((double)t)/CLOCKS_PER_SEC;
+				
+				fout << elapsed << "s";
+				
+				if (i + 1 != NUM_LENGTHS) { // Only show a comma if it's not the last of the lengths
+					fout << ", ";
+				}
+			}
+			fout << std::endl;
+		}
+		fout << std::endl;
 	}
+
 	fout.close(); // Close the file
 }
-
 
 // --------------------------- 
 void genRandomDataSet(int arr[], int arrSize) {
@@ -154,12 +173,26 @@ void genReverseDataSet(int arr[], int arrSize) {
 }
 
 // --------------------------- 
-void quickSort(int arr[], int highIndex, int lowIndex) {
+void swap(int* element1, int* element2) {
+	// Store the first element temporarily
+	int temp = *element1;
+	// Swap the elements
+	*element1 = *element2;
+	*element2 = temp;
+}
+
+// --------------------------- 
+void quickSort(int arr[], int highIndex) {
+	quickSortRecursive(arr, highIndex, 0);
+}
+
+// --------------------------- 
+void quickSortRecursive(int arr[], int highIndex, int lowIndex) {
 	if (lowIndex < highIndex) { // Make sure that the low index is actually lower than the high index
 		int partitioningIndex = partition(arr, lowIndex, highIndex);
 		
-		quickSort(arr, partitioningIndex - 1, lowIndex); // Sort before the partition
-		quickSort(arr, highIndex, partitioningIndex + 1); // Sort after the partition
+		quickSortRecursive(arr, partitioningIndex - 1, lowIndex); // Sort before the partition
+		quickSortRecursive(arr, highIndex, partitioningIndex + 1); // Sort after the partition
 	}
 }
 
@@ -180,10 +213,33 @@ int partition(int arr[], int lowIndex, int highIndex) {
 }
 
 // --------------------------- 
-void swap(int* element1, int* element2) {
-	// Store the first element temporarily
-	int temp = *element1;
-	// Swap the elements
-	*element1 = *element2;
-	*element2 = temp;
+void bubbleSort(int arr[], int size) {
+	for (int i = 0; i < size; i++) {
+		bool hasSwapped = false;
+		for (int j = 0; j < size - i - 1; j++) {
+			if (arr[j] > arr[j + 1]) {
+				swap(&arr[j], &arr[j+1]);
+				hasSwapped = true;
+			}
+		}
+		if (!hasSwapped) { // There were no swaps in this pass, so the array was sorted
+			break;
+		}
+	}
+}
+
+// --------------------------- 
+void insertionSort(int arr[], int size) {
+	int j;
+	for (int i = 0; i < size; i++) {
+		int key = arr[i];
+		
+		j = i - 1;
+		
+		while (j > 0 && arr[j] == key) {
+			arr[j + 1] = arr[j];
+			j--;
+		}
+		arr[j + 1] = key;
+	}
 }

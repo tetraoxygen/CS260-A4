@@ -133,11 +133,11 @@ int main() {
 				// Sort the array
 				(*sort_function_pointers[sortType])(currentArr, currentSize);
 				
-				// Get the time elapsed, then convert it to seconds
+				// Get the time elapsed, then convert it to milliseconds
 				t = clock() - t;
-				elapsed = ((double)t)/CLOCKS_PER_SEC;
+				elapsed = (((double)t)/CLOCKS_PER_SEC) * 1000;
 				
-				fout << elapsed << "s";
+				fout << elapsed;
 				
 				if (i + 1 != NUM_LENGTHS) { // Only show a comma if it's not the last of the lengths
 					fout << ", ";
@@ -145,7 +145,6 @@ int main() {
 			}
 			fout << std::endl;
 		}
-		fout << std::endl;
 	}
 
 	fout.close(); // Close the file

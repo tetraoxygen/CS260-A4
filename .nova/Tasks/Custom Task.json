@@ -6,7 +6,7 @@
     },
     "clean" : {
       "enabled" : true,
-      "script" : "rm -rf build\nmkdir build\ncd build\ncmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Debug .."
+      "script" : "rm -rf build\nmkdir build\ncd build\ncmake \"-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64\" -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Debug .."
     },
     "run" : {
       "enabled" : true,
